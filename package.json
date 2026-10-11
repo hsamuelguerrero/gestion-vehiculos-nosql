@@ -1,0 +1,29 @@
+{
+  "name": "gestion-vehiculos-nosql",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hsamuelguerrero/gestion-vehiculos-nosql.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hsamuelguerrero/gestion-vehiculos-nosql/issues"
+  },
+  "homepage": "https://github.com/hsamuelguerrero/gestion-vehiculos-nosql#readme",
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "express": "^5.3.0",
+    "mongodb": "^7.7.0"
+  }
+}
