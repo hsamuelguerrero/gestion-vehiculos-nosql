@@ -1,12 +1,13 @@
 {
   "name": "gestion-vehiculos-nosql",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API REST y Base de Datos NoSQL para gestión de vehículos usados",
+  "main": "src/app.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
+    "start": "node src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
