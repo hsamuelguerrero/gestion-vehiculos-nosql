@@ -1,0 +1,884 @@
+{
+  "info": {
+    "name": "Gestión Vehículos NoSQL – Vehículos y Clientes",
+    "description": "Grupo 6 – Bases de Datos II. Ejecutar en orden (Run collection): los POST guardan los ids en variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "vehiculoId",
+      "value": ""
+    },
+    {
+      "key": "clienteId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Vehículos",
+      "item": [
+        {
+          "name": "Crear vehículo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vin\": \"JTDBR32E720123456\",\n  \"marca\": \"Toyota\",\n  \"modelo\": \"Corolla\",\n  \"anio\": 2019,\n  \"precio\": 12500,\n  \"costo_compra\": 9800,\n  \"kilometraje\": 45000,\n  \"caracteristicas\": {\n    \"transmision\": \"automatica\",\n    \"combustible\": \"gasolina\",\n    \"color\": \"Blanco\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"vehiculoId\", pm.response.json()._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar vehículos (paginado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Formato de listado\", () => { const j = pm.response.json(); pm.expect(j).to.have.keys(\"data\",\"page\",\"limit\",\"total\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar: Toyota disponibles, más caros primero",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos?marca=toyota&estado=disponible&sort=precio&order=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ],
+              "query": [
+                {
+                  "key": "marca",
+                  "value": "toyota"
+                },
+                {
+                  "key": "estado",
+                  "value": "disponible"
+                },
+                {
+                  "key": "sort",
+                  "value": "precio"
+                },
+                {
+                  "key": "order",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Formato de listado\", () => { const j = pm.response.json(); pm.expect(j).to.have.keys(\"data\",\"page\",\"limit\",\"total\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar: rango de años y precio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos?anio_min=2015&anio_max=2020&precio_max=15000&sort=anio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ],
+              "query": [
+                {
+                  "key": "anio_min",
+                  "value": "2015"
+                },
+                {
+                  "key": "anio_max",
+                  "value": "2020"
+                },
+                {
+                  "key": "precio_max",
+                  "value": "15000"
+                },
+                {
+                  "key": "sort",
+                  "value": "anio"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Formato de listado\", () => { const j = pm.response.json(); pm.expect(j).to.have.keys(\"data\",\"page\",\"limit\",\"total\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar: subdocumento (diesel manual)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos?combustible=diesel&transmision=manual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ],
+              "query": [
+                {
+                  "key": "combustible",
+                  "value": "diesel"
+                },
+                {
+                  "key": "transmision",
+                  "value": "manual"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Formato de listado\", () => { const j = pm.response.json(); pm.expect(j).to.have.keys(\"data\",\"page\",\"limit\",\"total\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar: array (con reparaciones > $80)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos?con_reparaciones=true&reparacion_costo_min=80",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ],
+              "query": [
+                {
+                  "key": "con_reparaciones",
+                  "value": "true"
+                },
+                {
+                  "key": "reparacion_costo_min",
+                  "value": "80"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Formato de listado\", () => { const j = pm.response.json(); pm.expect(j).to.have.keys(\"data\",\"page\",\"limit\",\"total\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver vehículo por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{vehiculoId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar vehículo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{vehiculoId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"precio\": 11900,\n  \"estado\": \"reservado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Agregar reparación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}/reparaciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{vehiculoId}}",
+                "reparaciones"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Cambio de aceite y filtros\",\n  \"costo\": 45.5,\n  \"fecha\": \"2026-10-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar vehículo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{vehiculoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{vehiculoId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Crear cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"dui\": \"05123456-7\",\n  \"telefono\": \"70001234\",\n  \"email\": \"juan.perez@correo.com\",\n  \"direccion\": {\n    \"departamento\": \"San Salvador\",\n    \"municipio\": \"San Marcos\",\n    \"detalle\": \"Col. Las Brisas #12\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"clienteId\", pm.response.json()._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar clientes (paginado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes?page=1&limit=10&sort=nombre",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "nombre"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Formato de listado\", () => { const j = pm.response.json(); pm.expect(j).to.have.keys(\"data\",\"page\",\"limit\",\"total\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por nombre (parcial)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes?nombre=garc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ],
+              "query": [
+                {
+                  "key": "nombre",
+                  "value": "garc"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Formato de listado\", () => { const j = pm.response.json(); pm.expect(j).to.have.keys(\"data\",\"page\",\"limit\",\"total\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar por departamento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes?departamento=Santa Ana",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ],
+              "query": [
+                {
+                  "key": "departamento",
+                  "value": "Santa Ana"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Formato de listado\", () => { const j = pm.response.json(); pm.expect(j).to.have.keys(\"data\",\"page\",\"limit\",\"total\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver cliente por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar cliente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"79998888\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar cliente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Errores",
+      "item": [
+        {
+          "name": "Error 400: precio negativo ($jsonSchema)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vin\": \"JTDBR32E720999999\",\n  \"marca\": \"Toyota\",\n  \"modelo\": \"Corolla\",\n  \"anio\": 2019,\n  \"precio\": -500,\n  \"costo_compra\": 9800,\n  \"kilometraje\": 45000,\n  \"caracteristicas\": {\n    \"transmision\": \"automatica\",\n    \"combustible\": \"gasolina\",\n    \"color\": \"Blanco\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Error 400: DUI con formato inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"dui\": \"0512\",\n  \"telefono\": \"70001234\",\n  \"email\": \"juan.perez@correo.com\",\n  \"direccion\": {\n    \"departamento\": \"San Salvador\",\n    \"municipio\": \"San Marcos\",\n    \"detalle\": \"Col. Las Brisas #12\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Error 400: id inválido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "123"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Error 404: vehículo no existe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/507f1f77bcf86cd799439011",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "507f1f77bcf86cd799439011"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Error 400: marcar vendido sin venta",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/507f1f77bcf86cd799439011",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "507f1f77bcf86cd799439011"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"vendido\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
