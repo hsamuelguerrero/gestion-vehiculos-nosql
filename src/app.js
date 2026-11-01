@@ -15,6 +15,9 @@ app.get('/health', (req, res) => {
 app.use('/vehiculos', require('./routes/vehiculos'));
 app.use('/clientes', require('./routes/clientes'));
 
+app.use('/ventas', require('./routes/ventas'));
+app.use('/reportes', require('./routes/reportes'));
+
 app.use((req, res) => {
   res.status(404).json({ error: `Ruta no encontrada: ${req.method} ${req.originalUrl}` });
 });

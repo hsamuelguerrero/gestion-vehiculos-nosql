@@ -1,0 +1,5 @@
+$kind: http-request
+name: "3. Reporte: Ganancia por Marca"
+url: "{{baseUrl}}/reportes/ganancia-por-marca"
+method: GET
+order: 3000

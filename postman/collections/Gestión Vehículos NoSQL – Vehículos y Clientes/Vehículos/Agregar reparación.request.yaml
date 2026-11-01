@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/vehiculos/{{vehiculoId}}/reparaciones"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "descripcion": "Cambio de aceite y filtros",
+      "costo": 45.5,
+      "fecha": "2026-10-20"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status 201", () => pm.response.to.have.status(201));
+    language: text/javascript
+order: 9000

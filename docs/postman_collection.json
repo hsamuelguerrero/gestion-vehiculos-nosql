@@ -16,6 +16,10 @@
     {
       "key": "clienteId",
       "value": ""
+    },
+    {
+      "key": "ventaId",
+      "value": ""
     }
   ],
   "item": [
@@ -877,6 +881,71 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Ventas y Reportes",
+      "item": [
+        {
+          "name": "1. Registrar Venta",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/ventas", "host": ["{{baseUrl}}"], "path": ["ventas"]},
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_factura\": \"FAC-2026-9999\",\n  \"fecha\": \"2026-11-01\",\n  \"vehiculo_id\": \"{{vehiculoId}}\",\n  \"cliente_id\": \"{{clienteId}}\",\n  \"monto_total\": 12500,\n  \"metodo_pago\": \"transferencia\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"ventaId\", pm.response.json().data._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Error 409: Vehículo ya vendido",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/ventas", "host": ["{{baseUrl}}"], "path": ["ventas"]},
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_factura\": \"FAC-2026-9998\",\n  \"fecha\": \"2026-11-01\",\n  \"vehiculo_id\": \"{{vehiculoId}}\",\n  \"cliente_id\": \"{{clienteId}}\",\n  \"monto_total\": 12500,\n  \"metodo_pago\": \"transferencia\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Reporte: Ganancia por Marca",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/reportes/ganancia-por-marca", "host": ["{{baseUrl}}"], "path": ["reportes", "ganancia-por-marca"]}
+          }
+        },
+        {
+          "name": "4. Reporte: Ventas Mensuales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/reportes/ventas-mensuales", "host": ["{{baseUrl}}"], "path": ["reportes", "ventas-mensuales"]}
+          }
+        },
+        {
+          "name": "5. Reporte: Inventario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/reportes/inventario", "host": ["{{baseUrl}}"], "path": ["reportes", "inventario"]}
+          }
         }
       ]
     }

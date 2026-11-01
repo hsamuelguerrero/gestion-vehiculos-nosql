@@ -1,0 +1,14 @@
+$kind: http-request
+name: "Filtrar: array (con reparaciones > $80)"
+url: "{{baseUrl}}/vehiculos?con_reparaciones=true&reparacion_costo_min=80"
+method: GET
+queryParams:
+  con_reparaciones: "true"
+  reparacion_costo_min: "80"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 200", () => pm.response.to.have.status(200));
+      pm.test("Formato de listado", () => { const j = pm.response.json(); pm.expect(j).to.have.keys("data","page","limit","total"); });
+    language: text/javascript
+order: 6000
