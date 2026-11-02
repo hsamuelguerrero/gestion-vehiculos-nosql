@@ -1,0 +1,5 @@
+$kind: http-request
+name: "4. Reporte: Ventas Mensuales"
+url: "{{baseUrl}}/reportes/ventas-mensuales"
+method: GET
+order: 4000

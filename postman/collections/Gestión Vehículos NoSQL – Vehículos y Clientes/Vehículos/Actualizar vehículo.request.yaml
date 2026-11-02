@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/vehiculos/{{vehiculoId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "precio": 11900,
+      "estado": "reservado"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 8000

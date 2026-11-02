@@ -1,0 +1,19 @@
+$kind: http-request
+name: "Error 400: marcar vendido sin venta"
+url: "{{baseUrl}}/vehiculos/507f1f77bcf86cd799439011"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "estado": "vendido"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 400", () => pm.response.to.have.status(400));
+      pm.test("Formato de error", () => pm.expect(pm.response.json()).to.have.property("error"));
+    language: text/javascript
+order: 5000

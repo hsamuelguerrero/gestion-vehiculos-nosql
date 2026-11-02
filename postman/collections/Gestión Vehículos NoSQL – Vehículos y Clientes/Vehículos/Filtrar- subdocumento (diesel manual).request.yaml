@@ -1,0 +1,14 @@
+$kind: http-request
+name: "Filtrar: subdocumento (diesel manual)"
+url: "{{baseUrl}}/vehiculos?combustible=diesel&transmision=manual"
+method: GET
+queryParams:
+  combustible: diesel
+  transmision: manual
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 200", () => pm.response.to.have.status(200));
+      pm.test("Formato de listado", () => { const j = pm.response.json(); pm.expect(j).to.have.keys("data","page","limit","total"); });
+    language: text/javascript
+order: 5000

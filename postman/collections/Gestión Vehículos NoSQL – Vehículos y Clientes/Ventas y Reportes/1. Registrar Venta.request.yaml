@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/ventas"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "numero_factura": "FAC-2026-9999",
+      "fecha": "2026-11-01",
+      "vehiculo_id": "{{vehiculoId}}",
+      "cliente_id": "{{clienteId}}",
+      "monto_total": 12500,
+      "metodo_pago": "transferencia"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 201", () => pm.response.to.have.status(201));
+      pm.collectionVariables.set("ventaId", pm.response.json().data._id);
+    language: text/javascript
+order: 1000

@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/clientes?nombre=garc"
+method: GET
+queryParams:
+  nombre: garc
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 200", () => pm.response.to.have.status(200));
+      pm.test("Formato de listado", () => { const j = pm.response.json(); pm.expect(j).to.have.keys("data","page","limit","total"); });
+    language: text/javascript
+order: 3000

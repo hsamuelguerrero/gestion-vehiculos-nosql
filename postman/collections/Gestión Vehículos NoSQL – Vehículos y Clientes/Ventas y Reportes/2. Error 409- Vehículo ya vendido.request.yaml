@@ -1,0 +1,18 @@
+$kind: http-request
+name: "2. Error 409: Vehículo ya vendido"
+url: "{{baseUrl}}/ventas"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "numero_factura": "FAC-2026-9998",
+      "fecha": "2026-11-01",
+      "vehiculo_id": "{{vehiculoId}}",
+      "cliente_id": "{{clienteId}}",
+      "monto_total": 12500,
+      "metodo_pago": "transferencia"
+    }
+order: 2000

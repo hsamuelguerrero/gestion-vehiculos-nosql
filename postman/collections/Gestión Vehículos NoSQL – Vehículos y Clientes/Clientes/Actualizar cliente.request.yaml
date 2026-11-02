@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/clientes/{{clienteId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "telefono": "79998888"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Status 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 6000

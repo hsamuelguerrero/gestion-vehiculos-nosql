@@ -1,0 +1,5 @@
+$kind: http-request
+name: "5. Reporte: Inventario"
+url: "{{baseUrl}}/reportes/inventario"
+method: GET
+order: 5000
