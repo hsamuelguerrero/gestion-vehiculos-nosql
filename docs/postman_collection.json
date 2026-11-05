@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Gestión Vehículos NoSQL – Vehículos y Clientes",
-    "description": "Grupo 6 – Bases de Datos II. Ejecutar en orden (Run collection): los POST guardan los ids en variables.",
+    "name": "Gestión Vehículos NoSQL – Grupo 6",
+    "description": "Grupo 6 – Bases de Datos II. Ejecutar en orden (Run collection): los POST guardan los ids en variables y la carpeta de ventas limpia sus propios datos, así que se puede correr varias veces.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -19,6 +19,14 @@
     },
     {
       "key": "ventaId",
+      "value": ""
+    },
+    {
+      "key": "ventaVehiculoId",
+      "value": ""
+    },
+    {
+      "key": "ventaClienteId",
       "value": ""
     }
   ],
@@ -888,14 +896,32 @@
       "name": "Ventas y Reportes",
       "item": [
         {
-          "name": "1. Registrar Venta",
+          "name": "1. Crear vehículo para la venta",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "url": {"raw": "{{baseUrl}}/ventas", "host": ["{{baseUrl}}"], "path": ["ventas"]},
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos"
+              ]
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero_factura\": \"FAC-2026-9999\",\n  \"fecha\": \"2026-11-01\",\n  \"vehiculo_id\": \"{{vehiculoId}}\",\n  \"cliente_id\": \"{{clienteId}}\",\n  \"monto_total\": 12500,\n  \"metodo_pago\": \"transferencia\"\n}"
+              "raw": "{\n  \"vin\": \"3N1AB7AP5KY250001\",\n  \"marca\": \"Nissan\",\n  \"modelo\": \"Sentra\",\n  \"anio\": 2020,\n  \"precio\": 14500,\n  \"costo_compra\": 11200,\n  \"kilometraje\": 38000,\n  \"caracteristicas\": {\n    \"transmision\": \"automatica\",\n    \"combustible\": \"gasolina\",\n    \"color\": \"Gris\"\n  },\n  \"reparaciones\": [\n    {\n      \"fecha\": \"2026-10-05\",\n      \"descripcion\": \"Cambio de pastillas de freno\",\n      \"costo\": 120\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "event": [
@@ -905,47 +931,604 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set(\"ventaId\", pm.response.json().data._id);"
+                  "pm.collectionVariables.set(\"ventaVehiculoId\", pm.response.json()._id);"
                 ]
               }
             }
           ]
         },
         {
-          "name": "2. Error 409: Vehículo ya vendido",
+          "name": "2. Crear cliente comprador",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "url": {"raw": "{{baseUrl}}/ventas", "host": ["{{baseUrl}}"], "path": ["ventas"]},
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero_factura\": \"FAC-2026-9998\",\n  \"fecha\": \"2026-11-01\",\n  \"vehiculo_id\": \"{{vehiculoId}}\",\n  \"cliente_id\": \"{{clienteId}}\",\n  \"monto_total\": 12500,\n  \"metodo_pago\": \"transferencia\"\n}"
+              "raw": "{\n  \"nombre\": \"María López\",\n  \"dui\": \"06543210-1\",\n  \"telefono\": \"78889999\",\n  \"email\": \"maria.lopez@correo.com\",\n  \"direccion\": {\n    \"departamento\": \"La Libertad\",\n    \"municipio\": \"Santa Tecla\",\n    \"detalle\": \"Res. Las Palmas #5\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"ventaClienteId\", pm.response.json()._id);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "3. Reporte: Ganancia por Marca",
+          "name": "3. Registrar venta (financiamiento con prima)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ventas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ventas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_factura\": \"FAC-DEMO-0001\",\n  \"fecha\": \"2026-11-01\",\n  \"vehiculo_id\": \"{{ventaVehiculoId}}\",\n  \"cliente_id\": \"{{ventaClienteId}}\",\n  \"monto_total\": 14500,\n  \"metodo_pago\": \"financiamiento\",\n  \"pagos\": [\n    {\n      \"fecha\": \"2026-11-01\",\n      \"monto\": 5000,\n      \"metodo\": \"transferencia\"\n    }\n  ],\n  \"observaciones\": \"Prima de $5,000 y saldo en cuotas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"ventaId\", pm.response.json()._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Ver vehículo: ahora está vendido",
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/reportes/ganancia-por-marca", "host": ["{{baseUrl}}"], "path": ["reportes", "ganancia-por-marca"]}
-          }
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{ventaVehiculoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{ventaVehiculoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Estado vendido\", () => pm.expect(pm.response.json().estado).to.eql(\"vendido\"));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "4. Reporte: Ventas Mensuales",
+          "name": "5. Error 409: vehículo ya vendido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ventas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ventas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_factura\": \"FAC-DEMO-0002\",\n  \"vehiculo_id\": \"{{ventaVehiculoId}}\",\n  \"cliente_id\": \"{{ventaClienteId}}\",\n  \"monto_total\": 14500,\n  \"metodo_pago\": \"contado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. Error 400: falta numero_factura",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ventas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ventas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehiculo_id\": \"{{ventaVehiculoId}}\",\n  \"cliente_id\": \"{{ventaClienteId}}\",\n  \"monto_total\": 14500,\n  \"metodo_pago\": \"contado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7. Agregar pago (cuota)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/{{ventaId}}/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ventas",
+                "{{ventaId}}",
+                "pagos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"2026-12-01\",\n  \"monto\": 1500,\n  \"metodo\": \"transferencia\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Dos pagos\", () => pm.expect(pm.response.json().pagos).to.have.lengthOf(2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8. Error 400: pago mayor al saldo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/{{ventaId}}/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ventas",
+                "{{ventaId}}",
+                "pagos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"monto\": 50000,\n  \"metodo\": \"contado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9. Ver venta por id ($lookup vehículo y cliente)",
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/reportes/ventas-mensuales", "host": ["{{baseUrl}}"], "path": ["reportes", "ventas-mensuales"]}
-          }
+            "url": {
+              "raw": "{{baseUrl}}/ventas/{{ventaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ventas",
+                "{{ventaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye vehículo, cliente y saldo\", () => { const j = pm.response.json(); pm.expect(j).to.include.keys(\"vehiculo\",\"cliente\",\"saldo_pendiente\"); pm.expect(j.saldo_pendiente).to.eql(8000); });"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "5. Reporte: Inventario",
+          "name": "10. Listar ventas (filtro por método y fechas)",
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/reportes/inventario", "host": ["{{baseUrl}}"], "path": ["reportes", "inventario"]}
-          }
+            "url": {
+              "raw": "{{baseUrl}}/ventas?metodo_pago=financiamiento&fechaInicio=2026-01-01&fechaFin=2026-12-31&page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "metodo_pago",
+                  "value": "financiamiento"
+                },
+                {
+                  "key": "fechaInicio",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "fechaFin",
+                  "value": "2026-12-31"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Formato de listado\", () => pm.expect(pm.response.json()).to.have.keys(\"data\",\"page\",\"limit\",\"total\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11. Reporte: ventas mensuales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/ventas-mensuales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "ventas-mensuales"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Reporte con datos\", () => pm.expect(pm.response.json().data).to.be.an(\"array\").that.is.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12. Reporte: ganancia por marca",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/ganancia-por-marca",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "ganancia-por-marca"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Reporte con datos\", () => pm.expect(pm.response.json().data).to.be.an(\"array\").that.is.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13. Reporte: inventario disponible",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/inventario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "inventario"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Reporte con datos\", () => pm.expect(pm.response.json().data).to.be.an(\"array\").that.is.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14. Error 409: no se puede borrar un vehículo vendido",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{ventaVehiculoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{ventaVehiculoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15. Eliminar venta (vehículo vuelve a disponible)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/{{ventaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ventas",
+                "{{ventaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16. Error 404: venta ya eliminada",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/{{ventaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ventas",
+                "{{ventaId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Formato de error\", () => pm.expect(pm.response.json()).to.have.property(\"error\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "17. Limpiar: eliminar vehículo de la venta",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehiculos/{{ventaVehiculoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vehiculos",
+                "{{ventaVehiculoId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "18. Limpiar: eliminar cliente comprador",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{ventaClienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{ventaClienteId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         }
       ]
     }

@@ -1,78 +1,79 @@
 const { getDb } = require('../db');
 
-const ventasMensuales = async (req, res) => {
-    try {
-        const db = getDb();
-        const reporte = await db.collection('ventas').aggregate([
-            {
-                $group: {
-                    _id: { mes: { $month: "$fecha" }, anio: { $year: "$fecha" } },
-                    totalVendido: { $sum: "$monto_total" },
-                    cantidadVentas: { $sum: 1 }
-                }
-            },
-            { $sort: { "_id.anio": 1, "_id.mes": 1 } }
-        ]).toArray();
+const redondear = (campo) => ({ $round: [campo, 2] });
 
-        res.status(200).json({ data: reporte });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+async function ventasMensuales(req, res) {
+  const data = await getDb().collection('ventas').aggregate([
+    {
+      $group: {
+        _id: { anio: { $year: '$fecha' }, mes: { $month: '$fecha' } },
+        total_vendido: { $sum: '$monto_total' },
+        cantidad_ventas: { $sum: 1 },
+      },
+    },
+    { $sort: { '_id.anio': 1, '_id.mes': 1 } },
+    {
+      $project: {
+        _id: 0, anio: '$_id.anio', mes: '$_id.mes', cantidad_ventas: 1,
+        total_vendido: redondear('$total_vendido'),
+      },
+    },
+  ]).toArray();
+  res.json({ data });
+}
 
-const gananciaPorMarca = async (req, res) => {
-    try {
-        const db = getDb();
-        const reporte = await db.collection('ventas').aggregate([
-            {
-                $lookup: { from: "vehiculos", localField: "vehiculo_id", foreignField: "_id", as: "vehiculo" }
-            },
-            { $unwind: "$vehiculo" },
-            {
-                $addFields: { totalReparaciones: { $sum: "$vehiculo.reparaciones.costo" } }
-            },
-            {
-                $group: {
-                    _id: "$vehiculo.marca",
-                    ingresosTotales: { $sum: "$monto_total" },
-                    costoTotal: { $sum: { $add: ["$vehiculo.costo_compra", "$totalReparaciones"] } },
-                    gananciaNeta: {
-                        $sum: { $subtract: ["$monto_total", { $add: ["$vehiculo.costo_compra", "$totalReparaciones"] }] }
-                    }
-                }
-            },
-            { $sort: { gananciaNeta: -1 } }
-        ]).toArray();
+async function gananciaPorMarca(req, res) {
+  const data = await getDb().collection('ventas').aggregate([
+    { $lookup: { from: 'vehiculos', localField: 'vehiculo_id', foreignField: '_id', as: 'vehiculo' } },
+    { $unwind: '$vehiculo' },
+    {
+      $addFields: {
+        costo: { $add: ['$vehiculo.costo_compra', { $sum: '$vehiculo.reparaciones.costo' }] },
+      },
+    },
+    {
+      $group: {
+        _id: '$vehiculo.marca',
+        vehiculos_vendidos: { $sum: 1 },
+        ingresos: { $sum: '$monto_total' },
+        costo_total: { $sum: '$costo' },
+      },
+    },
+    {
+      $project: {
+        _id: 0, marca: '$_id', vehiculos_vendidos: 1,
+        ingresos: redondear('$ingresos'),
+        costo_total: redondear('$costo_total'),
+        ganancia_neta: redondear({ $subtract: ['$ingresos', '$costo_total'] }),
+      },
+    },
+    { $sort: { ganancia_neta: -1 } },
+  ]).toArray();
+  res.json({ data });
+}
 
-        res.status(200).json({ data: reporte });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-const inventarioDisponible = async (req, res) => {
-    try {
-        const db = getDb();
-        const reporte = await db.collection('vehiculos').aggregate([
-            { $match: { estado: "disponible" } },
-            {
-                $addFields: {
-                    diasEnInventario: { $dateDiff: { startDate: "$fecha_ingreso", endDate: new Date(), unit: "day" } }
-                }
-            },
-            {
-                $group: {
-                    _id: "$marca",
-                    vehiculosDisponibles: { $sum: 1 },
-                    promedioDiasInventario: { $avg: "$diasEnInventario" }
-                }
-            }
-        ]).toArray();
-
-        res.status(200).json({ data: reporte });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+async function inventarioDisponible(req, res) {
+  const data = await getDb().collection('vehiculos').aggregate([
+    { $match: { estado: 'disponible' } },
+    { $addFields: { dias: { $dateDiff: { startDate: '$fecha_ingreso', endDate: '$$NOW', unit: 'day' } } } },
+    {
+      $group: {
+        _id: '$marca',
+        disponibles: { $sum: 1 },
+        valor_inventario: { $sum: '$precio' },
+        promedio_dias_inventario: { $avg: '$dias' },
+      },
+    },
+    {
+      $project: {
+        _id: 0, marca: '$_id', disponibles: 1,
+        valor_inventario: redondear('$valor_inventario'),
+        promedio_dias_inventario: { $round: ['$promedio_dias_inventario', 0] },
+      },
+    },
+    { $sort: { disponibles: -1 } },
+  ]).toArray();
+  res.json({ data });
+}
 
 module.exports = { ventasMensuales, gananciaPorMarca, inventarioDisponible };
