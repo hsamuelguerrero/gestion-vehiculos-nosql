@@ -1,7 +1,0 @@
-$kind: collection
-description: "Grupo 6 – Bases de Datos II. Ejecutar en orden (Run collection): los POST guardan los ids en variables."
-variables:
-  baseUrl: http://localhost:3000
-  vehiculoId: ""
-  clienteId: ""
-  ventaId: ""
